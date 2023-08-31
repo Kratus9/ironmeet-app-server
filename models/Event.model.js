@@ -18,6 +18,7 @@ const eventSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  img: String
 });
 
 const Event = mongoose.model('Event', eventSchema);

@@ -2,13 +2,7 @@ const express = require('express');
 const router = express.Router();
 const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
 const User = require("../models/User.model");
-const Event = require("../models/Event.model");
-const Message = require("../models/Message.model");
-
-const {
-  isAuthenticated,
-  updateLocals,
-} = require("../middlewares/auth.middleware.js");
+const { isAuthenticated, updateLocals } = require("../middlewares/auth.middleware.js");
 
 // Importa el middleware de Cloudinary
 const uploader = require("../middlewares/cloudinary.middleware.js");
