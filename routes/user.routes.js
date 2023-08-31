@@ -14,7 +14,7 @@ const {
 const uploader = require("../middlewares/cloudinary.middleware.js");
 
 // Ruta para mostrar el perfil del usuario
-router.get("/user/profile", isAuthenticated, async (req, res, next) => {
+router.get("/profile", isAuthenticated, async (req, res, next) => {
   try {
     const user = await User.findById(req.payload._id);
     res.json(user)
@@ -24,8 +24,7 @@ router.get("/user/profile", isAuthenticated, async (req, res, next) => {
 });
 
 // Ruta para editar perfil
-router.patch("/user/profile/update",
-  cloudinaryMulter.single("img"),
+router.patch("/profile/update", isAuthenticated, cloudinaryMulter.single("img"),
   async (req, res, next) => {
     try {
       const userId = req.payload._id;
@@ -42,18 +41,26 @@ router.patch("/user/profile/update",
   }
 );
 
-// Ruta para mostrar las recetas favoritas del usuario
-router.get("/:userId/messages", isAuthenticated, async (req, res, next) => {
-  try {
-    const userId = req.payload._id;
-    const user = await User.findById(userId).populate("messages");
-    const messages = user.messages;
-    
-    res.json(messages)
-  } catch (error) {
-    next(error);
-  }
-});
+// Ruta para mostrar los mensajes de los matches del usuario
+router.get("/:matchId/messages", isAuthenticated, async (req, res, next) => {
+    try {
+      const userId = req.payload._id;
+      const matchId = req.params.matchId;
+  
+      const user = await User.findById(userId).populate("messages");
+      
+      const messagesWithMatch = user.messages.filter(message => {
+        return (
+          (message.sender.toString() === userId && message.receiver.toString() === matchId) ||
+          (message.sender.toString() === matchId && message.receiver.toString() === userId)
+        );
+      });
+  
+      res.json(messagesWithMatch);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // Ruta para mostrar los matches del usuario
 router.get("/:userId/matches", isAuthenticated, async (req, res, next) => {
@@ -78,64 +85,30 @@ router.get("/:userId/matches", isAuthenticated, async (req, res, next) => {
     }
   });
 
-// // Ruta para agregar o eliminar una patata de las favoritas del usuario
-// router.post(
-//   "/addOrRemoveFavPotatoes/:potatoId",
-//   isLoggedIn,
-//   async (req, res, next) => {
-//     try {
-//       const userId = req.session.user._id;
-//       const potatoId = req.params.potatoId;
-
-//       const user = await User.findById(userId);
-
-//       const isFavorite = user.favPotatoes.includes(potatoId);
-
-//       if (!isFavorite) {
-//         await User.findByIdAndUpdate(userId, {
-//           $push: { favPotatoes: potatoId },
-//         });
-//       } else {
-//         await User.findByIdAndUpdate(userId, {
-//           $pull: { favPotatoes: potatoId },
-//         });
-//       }
-
-      
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-// );
-
-// // Ruta para agregar o eliminar una receta de las favoritas del usuario
-// router.post(
-//   "/addOrRemoveFavRecipes/:recipeId",
-//   isLoggedIn,
-//   async (req, res, next) => {
-//     try {
-//       const userId = req.session.user._id;
-//       const recipeId = req.params.recipeId;
-
-//       const user = await User.findById(userId);
-
-//       const isFavorite = user.favRecipes.includes(recipeId);
-
-//       if (!isFavorite) {
-//         await User.findByIdAndUpdate(userId, {
-//           $push: { favRecipes: recipeId },
-//         });
-//       } else {
-//         await User.findByIdAndUpdate(userId, {
-//           $pull: { favRecipes: recipeId },
-//         });
-//       }
-
-      
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-// );
+// Ruta para agregar o eliminar un evento del usuario
+router.post("/addOrRemoveEvent/:eventId", isAuthenticated, async (req, res, next) => {
+    try {
+      const userId = req.payload._id;
+      const eventId = req.params.eventId;
+  
+      const user = await User.findById(userId);
+  
+      const isListed = user.events.includes(eventId);
+  
+      if (!isListed) {
+        await User.findByIdAndUpdate(userId, {
+          $push: { events: eventId },
+        });
+        res.json({ message: "Event added to user's list" });
+      } else {
+        await User.findByIdAndUpdate(userId, {
+          $pull: { events: eventId },
+        });
+        res.json({ message: "Event removed from user's list" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
 
 module.exports = router;

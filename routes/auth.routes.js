@@ -54,9 +54,9 @@ router.post("/signup", async (req, res, next) => {
 // POST "/api/auth/login" => Login and create session
 router.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const foundUser = await User.findOne({ email });
+    const foundUser = await User.findOne({ username });
     if (!foundUser) {
       return res.status(401).json({ errorMessage: "Invalid credentials" });
     }
