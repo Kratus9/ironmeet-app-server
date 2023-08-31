@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const cloudinaryMulter = require("../middlewares/cloudinary.middlewares");
 const User = require("../models/User.model");
