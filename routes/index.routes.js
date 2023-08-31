@@ -13,7 +13,4 @@ router.use("/user", userRouter);
 const eventRouter = require("./event.routes.js");
 router.use("/event", eventRouter);
 
-const messageRouter = require("./message.routes.js");
-router.use("/message", messageRouter);
-
 module.exports = router;

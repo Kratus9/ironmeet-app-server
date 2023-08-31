@@ -4,8 +4,6 @@ const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
 const User = require("../models/User.model");
 const { isAuthenticated, updateLocals } = require("../middlewares/auth.middleware.js");
 
-// Importa el middleware de Cloudinary
-const uploader = require("../middlewares/cloudinary.middleware.js");
 
 // Ruta para mostrar el perfil del usuario
 router.get("/profile", isAuthenticated, async (req, res, next) => {

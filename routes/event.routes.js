@@ -23,12 +23,12 @@ router.post(
   cloudinaryMulter.single("img"),
   async (req, res, next) => {
     try {
-      const result = req.file.path;
+      const eventImg = req.file.path;
       const newEvent = new Event({
         title: req.body.title,
         description: req.body.description,
         location: req.body.location,
-        img: result,
+        img: eventImg,
       });
 
       await Event.create(newEvent);

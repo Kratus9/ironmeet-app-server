@@ -4,11 +4,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
 const { isAuthenticated } = require("../middlewares/auth.middleware");
+const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
 
 // POST "/api/auth/signup" => Register
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", cloudinaryMulter.single("img"), async (req, res, next) => {
   try {
     const { username, email, password, repeatPassword, location, birthday } = req.body;
+    const imgResult= req.file.path;
 
     if (!username || !email || !password || !repeatPassword) {
       return res.status(400).json({ errorMessage: "All fields must be filled" });
@@ -42,7 +44,8 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashPassword,
       birthday,
-      location
+      location,
+      imgResult
     });
 
     res.json({ message: "User created" });
