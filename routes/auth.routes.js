@@ -8,7 +8,7 @@ const isAuthenticated = require("../middlewares/isAuthenticated")
 // POST "/api/auth/signup" => Register
 router.post("/signup", async (req, res, next) => {
 
-  const { username, email, password } = req.body
+  const { username, email, password, location, repeatPassword, birthday } = req.body
   console.log(req.body)
 
   //************
@@ -18,12 +18,43 @@ router.post("/signup", async (req, res, next) => {
   // - que la constraseña o email tenga un formato especifico
   // - que el usuario no esté repetido
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !repeatPassword) {
     res.status(400).json({ errorMessage: "All fields must be filled" })
     return;
   }
 
+  
+
+  const regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
+  if (regexPassword.test(password) === false) {
+    res.status(400).json({
+      errorMessage: "The password must have at least one uppercase letter, one lowercase letter, one special character, and be 8 characters long or more."
+    });
+    return; // detener la ejecucion de la ruta
+  }
+
+
+  if (password !== repeatPassword) {
+    res.status(400).json({
+      errorMessage: "Password and Repeat password do not match."
+    });
+    return; // detener la ejecucion de la ruta
+  }
+
   try {
+
+
+    const foundUser = await User.findOne({$or: [{email: email}, {username: username}]})
+    console.log(foundUser)
+    if (foundUser !== null) {
+      res.status(400).json({
+        errorMessage: "Username or email already exists."
+      })
+      return; // detener la ejecucion de la ruta
+    }
+
+
+
     //Encrypting password
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt)
@@ -34,6 +65,8 @@ router.post("/signup", async (req, res, next) => {
       username,
       email,
       password: hashPassword,
+      birthday,
+      location
 
     })
   
