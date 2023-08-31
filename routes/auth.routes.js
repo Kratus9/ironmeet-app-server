@@ -2,7 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
-const isAuthenticated = require("../middlewares/isAuthenticated");
+const isAuthenticated = require("../middlewares/auth.middleware")
 
 // POST "/api/auth/signup" => Register
 router.post("/signup", async (req, res, next) => {
