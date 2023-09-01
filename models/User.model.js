@@ -89,6 +89,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["male", "female", "I do not care"],
   },
+
+
+  lookingFor: {
+    type: String,
+    enum: ["long-term partner", "long-term but open to short-term", "short-term but open to long", "short-term fun", "new friends", "still figuring it out"],
+  },
+
   interests: [
     {
       type: String,

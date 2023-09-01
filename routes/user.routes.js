@@ -17,21 +17,35 @@ router.get("/profile", isAuthenticated, async (req, res, next) => {
 
 // Ruta para editar perfil
 router.patch("/profile/update", isAuthenticated, cloudinaryMulter.single("img"),
-  async (req, res, next) => {
-    try {
-      const userId = req.payload._id;
-      const updatedData = req.body;
-
-      const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
-        new: true,
-      });
-
-      res.json(updatedUser)
-    } catch (error) {
-      next(error);
-    }
+async (req, res, next) => {
+  try {
+    const userId = req.payload._id;
+    const updatedData = req.body;
+    
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+    });
+    
+    res.json(updatedUser)
+  } catch (error) {
+    next(error);
   }
+}
 );
+
+// Ruta para acceder al perfil de otra persona
+
+router.get("/:userId/profile", isAuthenticated, async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const user = await User.findById(userId);
+    res.json(user)
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 
 // Ruta para mostrar los mensajes de los matches del usuario
 router.get("/:matchId/messages", isAuthenticated, async (req, res, next) => {
@@ -78,7 +92,7 @@ router.get("/:userId/matches", isAuthenticated, async (req, res, next) => {
   });
 
 // Ruta para agregar o eliminar un evento del usuario
-router.post("/addOrRemoveEvent/:eventId", isAuthenticated, async (req, res, next) => {
+router.post("/addOrRemoveFavEvent/:eventId", isAuthenticated, async (req, res, next) => {
     try {
       const userId = req.payload._id;
       const eventId = req.params.eventId;
