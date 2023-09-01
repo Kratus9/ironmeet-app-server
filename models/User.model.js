@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   age: {
-    type: number,
+    type: Number,
     required: true,
   },
   location: {
