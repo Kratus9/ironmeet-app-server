@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+  username: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   email: {
     type: String,
     required: true,
@@ -26,9 +31,9 @@ const userSchema = new mongoose.Schema({
   img: {
     type: String,
   },
-  birthday: {
-    type: Date,
-    default: null,
+  age: {
+    type: number,
+    required: true,
   },
   location: {
     type: String,
