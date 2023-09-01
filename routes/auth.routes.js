@@ -9,7 +9,7 @@ const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
 // POST "/api/auth/signup" => Register
 router.post("/signup", cloudinaryMulter.single("img"), async (req, res, next) => {
   try {
-    const { username, email, password, repeatPassword, location, age } = req.body;
+    const { username, email, password, repeatPassword, location, age, name } = req.body;
     const imgResult= req.file.path;
 
     if (!username || !email || !password || !repeatPassword) {
@@ -40,6 +40,7 @@ router.post("/signup", cloudinaryMulter.single("img"), async (req, res, next) =>
     const hashPassword = await bcrypt.hash(password, salt);
 
     await User.create({
+      name,
       username,
       email,
       password: hashPassword,
