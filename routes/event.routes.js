@@ -20,7 +20,7 @@ router.post(
   "/new-event",
   isAuthenticated,
   updateLocals,
-  cloudinaryMulter.single("img"),
+  // cloudinaryMulter.single("img"),
   async (req, res, next) => {
     try {
       const eventImg = req.file.path;
@@ -55,7 +55,7 @@ router.put(
   "/:eventId/edit",
   isAuthenticated,
   updateLocals,
-  cloudinaryMulter.single("img"),
+  // cloudinaryMulter.single("img"),
   async (req, res, next) => {
     try {
       const { eventId } = req.params;

@@ -1,56 +1,101 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
 const { isAuthenticated } = require("../middlewares/auth.middleware");
-const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
+const { uploadImage, upload } = require("../middlewares/cloudinary.middleware");
+
 
 // POST "/api/auth/signup" => Register
-router.post("/signup", cloudinaryMulter.single("img"), async (req, res, next) => {
+router.post("/signup", upload.single("image"), async (req, res, next) => {
   try {
-    const { username, email, password, repeatPassword, location, age, name } = req.body;
-    const imgResult= req.file.path;
+    console.log("Received request to /signup");
+    const { username, email, password, repeatPassword } =
+      req.body;
+      console.log("req.body:", req.body);
+
+    req.on("data", (chunk) => {
+      console.log(`Received data chunk: ${chunk}`);
+    });
+
+    req.on("end", () => {
+      console.log("End of request data");
+    });
 
     if (!username || !email || !password || !repeatPassword) {
-      return res.status(400).json({ errorMessage: "All fields must be filled" });
+      return res
+        .status(400)
+        .json({ errorMessage: "All fields must be filled" });
     }
 
-    const regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
+    const regexPassword =
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
     if (!regexPassword.test(password)) {
       return res.status(400).json({
-        errorMessage: "The password must have specific requirements."
+        errorMessage: "The password must have specific requirements.",
       });
     }
 
     if (password !== repeatPassword) {
       return res.status(400).json({
-        errorMessage: "Password and Repeat password do not match."
+        errorMessage: "Password and Repeat password do not match.",
       });
     }
 
-    const foundUser = await User.findOne({ $or: [{ email: email }, { username: username }] });
+    const foundUser = await User.findOne({
+      $or: [{ email: email }, { username: username }],
+    });
     if (foundUser) {
       return res.status(400).json({
-        errorMessage: "Username or email already exists."
+        errorMessage: "Username or email already exists.",
       });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    await User.create({
-      name,
-      username,
-      email,
+    // Subir la imagen a Cloudinary y obtener la URL segura
+
+    const result = await uploadImage(req.file.buffer);
+    console.log("Result from uploadImage:", result);
+    
+    let imgUrl = null;
+    if (result && result.secure_url) {
+      imgUrl = result.secure_url;
+    } else {
+      console.log("Secure URL is not defined in the result.");
+    }
+    console.log("imgUrl after assignment:", imgUrl);
+
+    const newUser = new User({
+      name: req.body.name,
+      username: req.body.username,
+      email: req.body.email,
       password: hashPassword,
-      age,
-      location,
-      imgResult
+      age: req.body.age,
+      gender: req.body.gender,
+      location: req.body.location,
     });
+
+    
+    const imageUrl = await uploadImage(req.file.buffer);
+
+    if (imageUrl) {
+      newUser.image = imageUrl;
+    } else {
+      
+      newUser.image = 'URL de imagen predeterminada';
+    }
+
+    // Guardar el usuario en la base de datos
+    await newUser.save();
+
+    console.log("Usuario registrado con éxito");
 
     res.json({ message: "User created" });
   } catch (error) {
+    console.log("Error de validación:", error.message);
     next(error);
   }
 });
@@ -92,5 +137,4 @@ router.get("/verify", isAuthenticated, (req, res) => {
   res.json(req.payload);
 });
 
-module.exports = router;
-
+module.exports = router

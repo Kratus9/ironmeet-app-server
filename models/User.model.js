@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  username: {
+  name: {
     type: String,
     required: true,
     unique: true,
-    trim: true,
   },
   username: {
     type: String,
@@ -23,20 +22,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  role: {
+
+  gender: {
     type: String,
-    enum: ["user", "goldmember", "admin"],
-    default: "user",
+    required: true,
+
+    enum: ["Male", "Female", "Non-binary"],
   },
-  img: {
-    type: String,
-  },
+
   age: {
-    type: Number,
+    type: String,
     required: true,
   },
+
   location: {
     type: String,
+    required: true,
     enum: [
       "Álava",
       "Albacete",
@@ -90,34 +91,50 @@ const userSchema = new mongoose.Schema({
       "Zaragoza",
     ],
   },
-  preferences: {
+  image: {
     type: String,
-    enum: ["male", "female", "I do not care"],
+    required: true
   },
 
+  role: {
+    type: String,
+    enum: ["user", "goldmember", "admin"],
+    default: "user",
+  },
+
+  preferences: {
+    type: String,
+    enum: ["Male", "Female", "I do not care"],
+  },
 
   lookingFor: {
     type: String,
-    enum: ["long-term partner", "long-term but open to short-term", "short-term but open to long", "short-term fun", "new friends", "still figuring it out"],
+    enum: [
+      "long-term partner",
+      "long-term but open to short-term",
+      "short-term but open to long",
+      "short-term fun",
+      "new friends",
+      "still figuring it out",
+    ],
   },
 
-  interests: [
-    {
-      type: String,
-      enum: [
-        "Reading",
-        "Traveling",
-        "Television",
-        "Cinema",
-        "Music",
-        "Video Games",
-        "Sports",
-        "Gym and Fitness",
-        "Cooking",
-        "Motor",
-      ],
-    },
-  ],
+  interests: {
+    type: String,
+    enum: [
+      "Reading",
+      "Traveling",
+      "Television",
+      "Cinema",
+      "Music",
+      "Video Games",
+      "Sports",
+      "Gym and Fitness",
+      "Cooking",
+      "Motor",
+    ],
+  },
+
   events: [
     {
       type: mongoose.Schema.Types.ObjectId,

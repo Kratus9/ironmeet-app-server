@@ -16,7 +16,8 @@ router.get("/profile", isAuthenticated, async (req, res, next) => {
 });
 
 // Ruta para editar perfil
-router.patch("/profile/update", isAuthenticated, cloudinaryMulter.single("img"),
+router.patch("/profile/update", isAuthenticated,
+//  cloudinaryMulter.single("img"),
 async (req, res, next) => {
   try {
     const userId = req.payload._id;
