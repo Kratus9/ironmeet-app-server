@@ -6,6 +6,7 @@ const {
   isAuthenticated,
   updateLocals,
 } = require("../middlewares/auth.middleware.js");
+const Message = require("../models/Message.model");
 
 // Ruta para mostrar el perfil del usuario
 router.get("/profile", isAuthenticated, async (req, res, next) => {
@@ -113,30 +114,47 @@ router.post(
 );
 
 // Ruta para mostrar los mensajes de los matches del usuario
-router.get("/:matchId/messages", isAuthenticated, async (req, res, next) => {
+router.get("/matches/:messageId", isAuthenticated, async (req, res, next) => {
   try {
     const userId = req.payload._id;
-    const matchId = req.params.matchId;
+    const messageId = req.params.messageId;
 
-    const user = await User.findById(userId).populate("messages");
-
-    const messagesWithMatch = user.messages.filter((message) => {
-      return (
-        (message.sender.toString() === userId &&
-          message.receiver.toString() === matchId) ||
-        (message.sender.toString() === matchId &&
-          message.receiver.toString() === userId)
-      );
+    // Buscar un mensaje entre el usuario actual y la persona con la que hicieron match
+    const message = await Message.findOne({
+      $or: [
+        {
+          sender: userId,
+          destiny: messageId,
+        },
+        {
+          sender: messageId,
+          destiny: userId,
+        },
+      ],
     });
 
-    res.json(messagesWithMatch);
+    if (!message) {
+      // Si no existe un mensaje, crea uno nuevo
+      const newMessage = new Message({
+        text: '', // Puedes agregar un mensaje de inicio si lo deseas
+        owner: userId,
+        destiny: messageId,
+      });
+      await newMessage.save();
+
+      // Redirige a la página de chat con el nuevo mensaje creado
+      res.redirect(`/matches/${newMessage._id}`);
+    } else {
+      // Si existe un mensaje, redirige a la página de chat con el mensaje existente
+      res.redirect(`/matches/${message._id}`);
+    }
   } catch (error) {
     next(error);
   }
 });
 
 // Ruta para mostrar los matches del usuario
-router.get("/:userId/matches", isAuthenticated, async (req, res, next) => {
+router.get("/matches", isAuthenticated, async (req, res, next) => {
   try {
     const userId = req.payload._id;
     const users = await User.find({
