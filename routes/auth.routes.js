@@ -15,13 +15,6 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
       req.body;
       console.log("req.body:", req.body);
 
-    req.on("data", (chunk) => {
-      console.log(`Received data chunk: ${chunk}`);
-    });
-
-    req.on("end", () => {
-      console.log("End of request data");
-    });
 
     if (!username || !email || !password || !repeatPassword) {
       return res
