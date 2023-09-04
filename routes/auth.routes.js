@@ -33,7 +33,7 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
     if (!regexPassword.test(password)) {
       return res.status(400).json({
-        errorMessage: "The password must have specific requirements.",
+        errorMessage: "The password must contain at least one uppercase letter, one lowercase letter, one special character, and be 8 characters or longer.",
       });
     }
 
