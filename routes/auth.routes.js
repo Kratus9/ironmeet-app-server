@@ -69,6 +69,7 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
       age: req.body.age,
       gender: req.body.gender,
       location: req.body.location,
+      preferences: req.body.preferences,
     });
 
     

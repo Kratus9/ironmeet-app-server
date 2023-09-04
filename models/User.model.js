@@ -26,15 +26,15 @@ const userSchema = new mongoose.Schema({
   gender: {
     type: String,
     required: true,
-
-    enum: ["Male", "Female", "Non-binary"],
+    
+    enum: ["Male", "Female", "Other"],
   },
-
+  
   age: {
     type: String,
     required: true,
   },
-
+  
   location: {
     type: String,
     required: true,
@@ -91,6 +91,13 @@ const userSchema = new mongoose.Schema({
       "Zaragoza",
     ],
   },
+
+  preferences: {
+    type: String,
+    required: true,
+    enum: ["Male", "Female", "Other"],
+  },
+
   image: {
     type: String,
     required: true
@@ -102,10 +109,6 @@ const userSchema = new mongoose.Schema({
     default: "user",
   },
 
-  preferences: {
-    type: String,
-    enum: ["Male", "Female", "I do not care"],
-  },
 
   lookingFor: {
     type: String,
