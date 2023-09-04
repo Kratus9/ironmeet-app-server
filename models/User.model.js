@@ -142,7 +142,7 @@ const userSchema = new mongoose.Schema({
     },
   ],
 
-  fans: [
+  fanOf: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -74,14 +74,14 @@ router.get("/:userId/matches", isAuthenticated, async (req, res, next) => {
     try {
       const userId = req.payload._id;
       const users = await User.find({
-        fans: {
+        fanOf: {
           $in: [userId]
         }
       });
   
       const matches = [];
       for (const user of users) {
-        if (user.fans.includes(userId)) {
+        if (user.fanOf.includes(userId)) {
           matches.push(user);
         }
       }
