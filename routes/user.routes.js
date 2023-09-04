@@ -38,8 +38,6 @@ router.patch(
   }
 );
 
-
-
 // Ruta para acceder al perfil de otra persona
 
 router.get("/:userId/profile", isAuthenticated, async (req, res, next) => {
@@ -52,31 +50,19 @@ router.get("/:userId/profile", isAuthenticated, async (req, res, next) => {
   }
 });
 
-const filterUsersByPreferences = async (userId) => {
-  try {
-    
-    const currentUser = await User.findById(userId);
 
-   
+
+router.get("/swipe", isAuthenticated, async (req, res, next) => {
+  try {
+    const userId = req.payload._id;
+    const currentUser = await User.findById(userId);
     const filterCriteria = {
       gender: currentUser.preferences,
       location: currentUser.location,
       _id: { $nin: [...currentUser.fanOf, userId] },
     };
 
-    
     const filteredUsers = await User.find(filterCriteria);
-
-    return filteredUsers;
-  } catch (error) {
-    throw error;
-  }
-};
-
-router.get('/swipe', isAuthenticated, async (req, res, next) => {
-  try {
-    const userId = req.payload._id;
-    const filteredUsers = await filterUsersByPreferences(userId);
 
     res.json(filteredUsers);
   } catch (error) {
@@ -109,19 +95,17 @@ router.post(
         });
       }
 
-      
       const usersToSwipe = await User.find({
+        gender: currentUser.preferences,
+        location: currentUser.location,
         _id: { $nin: [...currentUser.fanOf, userId] },
       });
 
-      
       if (usersToSwipe.length > 0) {
         res.json(usersToSwipe);
       } else {
         res.json({ message: "No more users to swipe" });
       }
-
-      
     } catch (error) {
       next(error);
     }
