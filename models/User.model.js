@@ -138,6 +138,8 @@ const userSchema = new mongoose.Schema({
     ],
   },
 
+  description: String,
+
   events: [
     {
       type: mongoose.Schema.Types.ObjectId,
