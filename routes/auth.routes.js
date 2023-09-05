@@ -49,7 +49,6 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
     const hashPassword = await bcrypt.hash(password, salt);
 
     // Subir la imagen a Cloudinary y obtener la URL segura
-
     const result = await uploadImage(req.file.buffer);
     console.log("Result from uploadImage:", result);
     

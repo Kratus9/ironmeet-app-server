@@ -5,7 +5,7 @@ const {
 } = require("../middlewares/auth.middleware");
 const router = express.Router();
 const Event = require("../models/Event.model");
-const cloudinaryMulter = require("../middlewares/cloudinary.middleware");
+const { uploadImage, upload } = require("../middlewares/cloudinary.middleware");
 
 router.get("/", isAuthenticated, async (req, res, next) => {
   try {
@@ -15,31 +15,53 @@ router.get("/", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
+
 // Jorge si lees esto eres el mejor!
 router.post(
   "/new-event",
+  upload.single("image"),
   isAuthenticated,
-  updateLocals,
-  // cloudinaryMulter.single("img"),
   async (req, res, next) => {
     try {
-      const eventImg = req.file.path;
       const eventOwner = req.payload._id;
-      const newEvent = new Event({
-        title: req.body.title,
-        description: req.body.description,
-        location: req.body.location,
-        img: eventImg,
-        owner: eventOwner,
-      });
-
-      await Event.create(newEvent);
-      res.json({ message: "Event created" });
-    } catch (error) {
-      next(error);
+    const result = await uploadImage(req.file.buffer);  
+    console.log("Result from uploadImage:", result);
+    
+    let imgUrl = null;
+    if (result && result.secure_url) {
+      imgUrl = result.secure_url;
+    } else {
+      console.log("Secure URL is not defined in the result.");
     }
+    console.log("imgUrl after assignment:", imgUrl);
+
+    const newEvent = new Event({
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+      owner: eventOwner
+    });
+
+    const imageUrl = await uploadImage(req.file.buffer);
+
+    if (imageUrl) {
+      newEvent.image = imageUrl;
+    } else {
+      newEvent.image = 'URL de imagen predeterminada';
+    }
+
+    // Guardar el usuario en la base de datos
+    await newEvent.save();
+
+    console.log("Evento registrado con éxito");
+
+    res.json({ message: "Event created" });
+  } catch (error) {
+    console.log("Error de validación:", error.message);
+    next(error);
   }
-);
+});
+
 // Pedro no seas envidioso, tu tambien eres el mejor!
 router.get("/:eventId/details", async (req, res, next) => {
   try {
