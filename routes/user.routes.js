@@ -114,40 +114,41 @@ router.post(
 );
 
 // Ruta para mostrar los mensajes de los matches del usuario
-router.get("/matches/:messageId", isAuthenticated, async (req, res, next) => {
+router.get("/messages/:senderId/:receiverId", isAuthenticated, async (req, res, next) => {
   try {
-    const userId = req.payload._id;
-    const messageId = req.params.messageId;
+    const senderId = req.params.senderId;
+    const receiverId = req.params.receiverId;
 
-    // Buscar un mensaje entre el usuario actual y la persona con la que hicieron match
-    const message = await Message.findOne({
+    const messages = await Message.find({
       $or: [
-        {
-          sender: userId,
-          destiny: messageId,
-        },
-        {
-          sender: messageId,
-          destiny: userId,
-        },
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId },
       ],
+    }).sort({ createdAt: 1 });
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener los mensajes" });
+  }
+});
+
+
+router.post("/messages/new-message", isAuthenticated, async (req, res, next) => {
+  try {
+    const { sender, receiver, text } = req.body; // Cambia "destiny" a "receiver" para mantener la consistencia con el modelo de datos
+
+    // Crear una nueva instancia de Message
+    const newMessage = new Message({
+      sender,
+      receiver,
+      text
     });
 
-    if (!message) {
-      // Si no existe un mensaje, crea uno nuevo
-      const newMessage = new Message({
-        text: '', // Puedes agregar un mensaje de inicio si lo deseas
-        owner: userId,
-        destiny: messageId,
-      });
-      await newMessage.save();
+    // Guardar el mensaje en la base de datos
+    await newMessage.save();
 
-      // Redirige a la página de chat con el nuevo mensaje creado
-      res.redirect(`/matches/${newMessage._id}`);
-    } else {
-      // Si existe un mensaje, redirige a la página de chat con el mensaje existente
-      res.redirect(`/matches/${message._id}`);
-    }
+    // Devolver el mensaje recién creado como respuesta
+    res.json(newMessage);
   } catch (error) {
     next(error);
   }
@@ -175,6 +176,7 @@ router.get("/matches", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
+
 
 // Ruta para agregar o eliminar un evento del usuario
 router.post(
