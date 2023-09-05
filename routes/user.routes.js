@@ -51,6 +51,27 @@ router.get("/:userId/profile", isAuthenticated, async (req, res, next) => {
   }
 });
 
+router.patch(
+  "/:userId/profile/update",
+  isAuthenticated,
+  //  cloudinaryMulter.single("img"),
+  async (req, res, next) => {
+    try {
+      const { userId } = req.params;
+      const updatedData = req.body;
+
+      const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+        new: true,
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
 
 
 router.get("/swipe", isAuthenticated, async (req, res, next) => {
