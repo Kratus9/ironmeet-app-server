@@ -71,9 +71,6 @@ router.patch(
   }
 );
 
-
-
-
 router.get("/swipe", isAuthenticated, async (req, res, next) => {
   try {
     const userId = req.payload._id;
@@ -135,45 +132,52 @@ router.post(
 );
 
 // Ruta para mostrar los mensajes de los matches del usuario
-router.get("/messages/:senderId/:receiverId", isAuthenticated, async (req, res, next) => {
-  try {
-    const senderId = req.params.senderId;
-    const receiverId = req.params.receiverId;
+router.get(
+  "/messages/:senderId/:receiverId",
+  isAuthenticated,
+  async (req, res, next) => {
+    try {
+      const senderId = req.params.senderId;
+      const receiverId = req.params.receiverId;
 
-    const messages = await Message.find({
-      $or: [
-        { sender: senderId, receiver: receiverId },
-        { sender: receiverId, receiver: senderId },
-      ],
-    }).sort({ createdAt: 1 });
+      const messages = await Message.find({
+        $or: [
+          { sender: senderId, receiver: receiverId },
+          { sender: receiverId, receiver: senderId },
+        ],
+      }).sort({ createdAt: 1 });
 
-    res.json(messages);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener los mensajes" });
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener los mensajes" });
+    }
   }
-});
+);
 
+router.post(
+  "/messages/new-message",
+  isAuthenticated,
+  async (req, res, next) => {
+    try {
+      const { sender, receiver, text } = req.body;
 
-router.post("/messages/new-message", isAuthenticated, async (req, res, next) => {
-  try {
-    const { sender, receiver, text } = req.body; // Cambia "destiny" a "receiver" para mantener la consistencia con el modelo de datos
+      
+      const newMessage = new Message({
+        sender,
+        receiver,
+        text,
+      });
 
-    // Crear una nueva instancia de Message
-    const newMessage = new Message({
-      sender,
-      receiver,
-      text
-    });
+      
+      await newMessage.save();
 
-    // Guardar el mensaje en la base de datos
-    await newMessage.save();
-
-    // Devolver el mensaje recién creado como respuesta
-    res.json(newMessage);
-  } catch (error) {
-    next(error);
+      
+      res.json(newMessage);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 // Ruta para mostrar los matches del usuario
 router.get("/matches", isAuthenticated, async (req, res, next) => {
@@ -197,7 +201,6 @@ router.get("/matches", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
-
 
 // Ruta para agregar o eliminar un evento del usuario
 router.post(
@@ -228,5 +231,46 @@ router.post(
     }
   }
 );
+
+router.get("/likedBy", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.payload._id;
+
+    const currentUser = await User.findById(userId);
+    
+    
+    const usersLikedBy = await User.find({ fanOf: userId });
+
+    
+    const usersWhoLikedYou = usersLikedBy.filter((user) => {
+      return !currentUser.fanOf.includes(user._id);
+    });
+
+    res.json(usersWhoLikedYou);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error getting users who liked you" });
+  }
+});
+
+router.patch("/:userId/like", isAuthenticated, async (req, res, next) => {
+  try {
+    const activeUserId = req.payload._id;
+    const { userId } = req.params;
+
+    
+    const currentUser = await User.findById(activeUserId);
+    if (!currentUser.fanOf.includes(userId)) {
+      
+      await User.findByIdAndUpdate(activeUserId, {
+        $push: { fanOf: userId },
+      });
+    }
+
+    res.json({ message: "Chat started successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
