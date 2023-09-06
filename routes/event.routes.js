@@ -68,6 +68,7 @@ router.get("/:eventId/details", async (req, res, next) => {
     const { eventId } = req.params;
     const event = await Event.findById(eventId);
     res.json(event);
+    console.log(event)
   } catch (error) {
     next(error);
   }
