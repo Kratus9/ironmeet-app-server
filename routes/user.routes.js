@@ -22,7 +22,7 @@ router.get("/profile", isAuthenticated, async (req, res, next) => {
 router.patch(
   "/profile/update",
   isAuthenticated,
-  //  cloudinaryMulter.single("img"),
+  
   async (req, res, next) => {
     try {
       const userId = req.payload._id;
@@ -54,7 +54,7 @@ router.get("/:userId/profile", isAuthenticated, async (req, res, next) => {
 router.patch(
   "/:userId/profile/update",
   isAuthenticated,
-  //  cloudinaryMulter.single("img"),
+  
   async (req, res, next) => {
     try {
       const { userId } = req.params;
@@ -98,6 +98,9 @@ router.post(
       const userId = req.payload._id;
       const { userId: targetUserId, action } = req.params;
 
+      
+      const currentUser = await User.findById(userId);
+
       if (action !== "like" && action !== "dislike") {
         return res.status(400).json({ message: "Invalid action" });
       }
@@ -106,13 +109,26 @@ router.post(
         return res.status(400).json({ message: "Cannot swipe on yourself" });
       }
 
-      const currentUser = await User.findById(userId);
+      const targetUser = await User.findById(targetUserId);
+
+      let responseMessage = "";
 
       if (action === "like") {
         await User.findByIdAndUpdate(userId, {
           $push: { fanOf: targetUserId },
         });
+
+        if (targetUser.fanOf.includes(userId)) {
+        
+
+          responseMessage = "Matched!";
+        } else {
+          
+          responseMessage = "Liked!";
+        }
       }
+
+
 
       const usersToSwipe = await User.find({
         gender: currentUser.preferences,
@@ -121,9 +137,9 @@ router.post(
       });
 
       if (usersToSwipe.length > 0) {
-        res.json(usersToSwipe);
+        res.json({ message: responseMessage, usersToSwipe });
       } else {
-        res.json({ message: "No more users to swipe" });
+        res.json({ message: responseMessage, usersToSwipe: [] });
       }
     } catch (error) {
       next(error);
