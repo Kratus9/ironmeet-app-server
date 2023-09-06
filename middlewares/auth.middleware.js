@@ -38,7 +38,7 @@ async function updateLocals(req, res, next) {
         res.locals.isUserActive = false;
         res.locals.isEventOwner = false;
         res.locals.isMessageOwner = false;
-        res.locals.isGoldMember = false;
+        res.locals.isDiamondMember = false;
         res.locals.isAdmin = false;
         return next();
       }
@@ -50,8 +50,8 @@ async function updateLocals(req, res, next) {
       const { eventId, messageId } = req.params;
       res.locals.localId = userId;
   
-      if (userRole === "goldmember") {
-        res.locals.isGoldMember = true;
+      if (userRole === "diamondMember") {
+        res.locals.isDiamondMember = true;
       }
       if (userRole === "admin") {
         res.locals.isAdmin = true;
@@ -80,7 +80,7 @@ async function updateLocals(req, res, next) {
       console.log("isAdmin:", res.locals.isAdmin);
       console.log("isEventOwner:", res.locals.isEventOwner);
       console.log("isMessageOwner:", res.locals.isMessageOwner);
-      console.log("isGoldMember:", res.locals.isGoldMember);
+      console.log("isDiamondMember:", res.locals.isDiamondMember);
   
       next();
     } catch (error) {
