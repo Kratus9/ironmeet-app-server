@@ -98,7 +98,6 @@ router.post(
       const userId = req.payload._id;
       const { userId: targetUserId, action } = req.params;
 
-      
       const currentUser = await User.findById(userId);
 
       if (action !== "like" && action !== "dislike") {
@@ -114,21 +113,19 @@ router.post(
       let responseMessage = "";
 
       if (action === "like") {
-        await User.findByIdAndUpdate(userId, {
-          $push: { fanOf: targetUserId },
-        });
+        
+        if (!currentUser.fanOf.includes(targetUserId)) {
+          await User.findByIdAndUpdate(userId, {
+            $push: { fanOf: targetUserId },
+          });
+        }
 
         if (targetUser.fanOf.includes(userId)) {
-        
-
           responseMessage = "Matched!";
         } else {
-          
           responseMessage = "Liked!";
         }
       }
-
-
 
       const usersToSwipe = await User.find({
         gender: currentUser.preferences,
