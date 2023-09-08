@@ -10,11 +10,8 @@ const { uploadImage, upload } = require("../middlewares/cloudinary.middleware");
 // POST "/api/auth/signup" => Register
 router.post("/signup", upload.single("image"), async (req, res, next) => {
   try {
-    console.log("Received request to /signup");
     const { username, email, password, repeatPassword } =
       req.body;
-      console.log("req.body:", req.body);
-
 
     if (!username || !email || !password || !repeatPassword) {
       return res
@@ -50,7 +47,6 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
 
     // Subir la imagen a Cloudinary y obtener la URL segura
     const result = await uploadImage(req.file.buffer);
-    console.log("Result from uploadImage:", result);
     
     let imgUrl = null;
     if (result && result.secure_url) {
@@ -58,7 +54,6 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
     } else {
       console.log("Secure URL is not defined in the result.");
     }
-    console.log("imgUrl after assignment:", imgUrl);
 
     const newUser = new User({
       name: req.body.name,
@@ -83,8 +78,6 @@ router.post("/signup", upload.single("image"), async (req, res, next) => {
 
     // Guardar el usuario en la base de datos
     await newUser.save();
-
-    console.log("Usuario registrado con éxito");
 
     res.json({ message: "User created" });
   } catch (error) {

@@ -24,8 +24,7 @@ router.post(
   async (req, res, next) => {
     try {
       const eventOwner = req.payload._id;
-    const result = await uploadImage(req.file.buffer);  
-    console.log("Result from uploadImage:", result);
+    const result = await uploadImage(req.file.buffer);
     
     let imgUrl = null;
     if (result && result.secure_url) {
@@ -33,7 +32,6 @@ router.post(
     } else {
       console.log("Secure URL is not defined in the result.");
     }
-    console.log("imgUrl after assignment:", imgUrl);
 
     const newEvent = new Event({
       title: req.body.title,
@@ -53,8 +51,6 @@ router.post(
     // Guardar el usuario en la base de datos
     await newEvent.save();
 
-    console.log("Evento registrado con éxito");
-
     res.json({ message: "Event created" });
   } catch (error) {
     console.log("Error de validación:", error.message);
@@ -68,7 +64,6 @@ router.get("/:eventId/details", async (req, res, next) => {
     const { eventId } = req.params;
     const event = await Event.findById(eventId);
     res.json(event);
-    console.log(event)
   } catch (error) {
     next(error);
   }
